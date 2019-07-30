@@ -1,5 +1,5 @@
 //
-// 20141209: kcchang: changed window version to linux 
+// 20190716: margaret.coad
 
 // myAllegroHand.cpp : Defines the entry point for the console application.
 //
@@ -12,7 +12,9 @@
 #include "canAPI.h"
 #include "rDeviceAllegroHandCANDef.h"
 #include "RockScissorsPaper.h"
+#include "Step.h"
 #include <BHand/BHand.h>
+#include <time.h>
 
 #define PEAKCAN (1)
 
@@ -48,6 +50,10 @@ const bool	RIGHT_HAND = false;
 const int	HAND_VERSION = 4;
 
 const double tau_cov_const_v4 = 1200.0; // 1200.0 for SAH040xxxxx
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// for file IO
+FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
@@ -155,12 +161,33 @@ static void* ioThreadProc(void* inst)
                         q[i] = (double)(vars.enc_actual[i])*(333.3/65536.0)*(3.141592/180.0);
                     }
 
-                    // print joint angles
+                    // print actual joint angles in degrees
 //                    for (int i=0; i<4; i++)
 //                    {
 //                        printf(">CAN(%d): Joint[%d] Pos : %5.1f %5.1f %5.1f %5.1f\n"
 //                            , CAN_Ch, i, q[i*4+0]*RAD2DEG, q[i*4+1]*RAD2DEG, q[i*4+2]*RAD2DEG, q[i*4+3]*RAD2DEG);
 //                    }
+
+                    // print current time in seconds
+                    fprintf(outFile,"%8.4f", curTime);
+
+//                    // print actual current time in seconds (same as current time above
+//                    time_t clockTime;
+//                    time(&clockTime);
+//                    printf("%16.12f", clockTime);
+
+                    // print desired joint angles in radians
+                    for (int i=0; i<16; i++)
+                    {
+                        fprintf(outFile,"%8.4f", q_des[i]);
+                    }
+
+                    // print actual joint angles in radians
+                    for (int i=0; i<16; i++)
+                    {
+                        fprintf(outFile,"%8.4f", q[i]);
+                    }
+                    fprintf(outFile,"\n");
 
                     // compute joint torque
                     ComputeTorque();
@@ -283,6 +310,42 @@ void MainLoop()
 
         case '3':
             MotionPaper();
+            break;
+
+        case '4':
+            MotionStepDown();
+            break;
+
+        case '5':
+            MotionStepUp3();
+            break;
+
+        case '6':
+            MotionStepUp2();
+            break;
+
+        case '7':
+            MotionStepUp1();
+            break;
+
+        case '8':
+            MotionStepUp0();
+            break;
+
+        case '9':
+            MotionStepUp15();
+            break;
+
+        case '0':
+            MotionStepUp14();
+            break;
+
+        case '-':
+            MotionStepUp13();
+            break;
+
+        case '=':
+            MotionStepUp12();
             break;
         }
     }
@@ -441,6 +504,8 @@ void PrintInstruction()
     printf("myAllegroHand: ");
     if (RIGHT_HAND) printf("Right Hand, v%i.x\n\n", HAND_VERSION); else printf("Left Hand, v%i.x\n\n", HAND_VERSION);
 
+    printf("Toyota Research Institute is awesome!!!\n\n");
+
     printf("Keyboard Commands:\n");
     printf("H: Home Position (PD control)\n");
     printf("R: Ready Position (used before grasping)\n");
@@ -449,7 +514,19 @@ void PrintInstruction()
     printf("P: Two-finger pinch (index-thumb)\n");
     printf("M: Two-finger pinch (middle-thumb)\n");
     printf("E: Envelop Grasp (all fingers)\n");
-    printf("A: Gravity Compensation\n\n");
+    printf("A: Gravity Compensation\n");
+    printf("1: Rock\n");
+    printf("2: Scissors\n");
+    printf("3: Paper\n");
+    printf("4: Step Down\n");
+    printf("5: Step Up Finger Tip\n");
+    printf("6: Step Up Finger Middle\n");
+    printf("7: Step Up Finger Base\n");
+    printf("8: Step Up Finger Rotate\n");
+    printf("9: Step Up Thumb Tip\n");
+    printf("0: Step Up Thumb Middle\n");
+    printf("-: Step Up Thumb Rotate\n");
+    printf("=: Step Up Thumb Grasp\n");
     printf("F: Servos OFF (any grasp cmd turns them back on)\n");
     printf("Q: Quit this program\n");
 
@@ -526,6 +603,7 @@ int GetCANChannelIndex(const TCHAR* cname)
 // Program main
 int main(int argc, TCHAR* argv[])
 {
+    outFile = fopen("joint12radtest", "w");
     PrintInstruction();
 
     memset(&vars, 0, sizeof(vars));
@@ -540,6 +618,7 @@ int main(int argc, TCHAR* argv[])
 
     CloseCAN();
     DestroyBHandAlgorithm();
+    fclose(outFile);
 
     return 0;
 }

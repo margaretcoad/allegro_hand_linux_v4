@@ -198,6 +198,33 @@ RockScissorsPaper.cpp.s:
 	cd /home/margaretcoad/allegro_hand_linux_v4/build && $(MAKE) -f grasp/CMakeFiles/grasp.dir/build.make grasp/CMakeFiles/grasp.dir/RockScissorsPaper.cpp.s
 .PHONY : RockScissorsPaper.cpp.s
 
+Step.o: Step.cpp.o
+
+.PHONY : Step.o
+
+# target to build an object file
+Step.cpp.o:
+	cd /home/margaretcoad/allegro_hand_linux_v4/build && $(MAKE) -f grasp/CMakeFiles/grasp.dir/build.make grasp/CMakeFiles/grasp.dir/Step.cpp.o
+.PHONY : Step.cpp.o
+
+Step.i: Step.cpp.i
+
+.PHONY : Step.i
+
+# target to preprocess a source file
+Step.cpp.i:
+	cd /home/margaretcoad/allegro_hand_linux_v4/build && $(MAKE) -f grasp/CMakeFiles/grasp.dir/build.make grasp/CMakeFiles/grasp.dir/Step.cpp.i
+.PHONY : Step.cpp.i
+
+Step.s: Step.cpp.s
+
+.PHONY : Step.s
+
+# target to generate assembly for a file
+Step.cpp.s:
+	cd /home/margaretcoad/allegro_hand_linux_v4/build && $(MAKE) -f grasp/CMakeFiles/grasp.dir/build.make grasp/CMakeFiles/grasp.dir/Step.cpp.s
+.PHONY : Step.cpp.s
+
 canAPI.o: canAPI.cpp.o
 
 .PHONY : canAPI.o
@@ -268,6 +295,9 @@ help:
 	@echo "... RockScissorsPaper.o"
 	@echo "... RockScissorsPaper.i"
 	@echo "... RockScissorsPaper.s"
+	@echo "... Step.o"
+	@echo "... Step.i"
+	@echo "... Step.s"
 	@echo "... canAPI.o"
 	@echo "... canAPI.i"
 	@echo "... canAPI.s"

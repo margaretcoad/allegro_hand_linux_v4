@@ -4,12 +4,16 @@
 grasp/CMakeFiles/grasp.dir/RockScissorsPaper.cpp.o
  /home/margaretcoad/allegro_hand_linux_v4/grasp/RockScissorsPaper.cpp
  /home/margaretcoad/allegro_hand_linux_v4/grasp/rDeviceAllegroHandCANDef.h
+grasp/CMakeFiles/grasp.dir/Step.cpp.o
+ /home/margaretcoad/allegro_hand_linux_v4/grasp/Step.cpp
+ /home/margaretcoad/allegro_hand_linux_v4/grasp/rDeviceAllegroHandCANDef.h
 grasp/CMakeFiles/grasp.dir/canAPI.cpp.o
  /home/margaretcoad/allegro_hand_linux_v4/grasp/canAPI.cpp
  /home/margaretcoad/allegro_hand_linux_v4/grasp/canAPI.h
  /home/margaretcoad/allegro_hand_linux_v4/grasp/canDef.h
 grasp/CMakeFiles/grasp.dir/main.cpp.o
  /home/margaretcoad/allegro_hand_linux_v4/grasp/RockScissorsPaper.h
+ /home/margaretcoad/allegro_hand_linux_v4/grasp/Step.h
  /home/margaretcoad/allegro_hand_linux_v4/grasp/canAPI.h
  /home/margaretcoad/allegro_hand_linux_v4/grasp/canDef.h
  /home/margaretcoad/allegro_hand_linux_v4/grasp/main.cpp

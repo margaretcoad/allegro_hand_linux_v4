@@ -14,6 +14,14 @@ BHand/BHand.h
 
 /home/margaretcoad/allegro_hand_linux_v4/grasp/RockScissorsPaper.h
 
+/home/margaretcoad/allegro_hand_linux_v4/grasp/Step.cpp
+rDeviceAllegroHandCANDef.h
+/home/margaretcoad/allegro_hand_linux_v4/grasp/rDeviceAllegroHandCANDef.h
+BHand/BHand.h
+-
+
+/home/margaretcoad/allegro_hand_linux_v4/grasp/Step.h
+
 /home/margaretcoad/allegro_hand_linux_v4/grasp/canAPI.cpp
 stdio.h
 -
@@ -65,7 +73,11 @@ rDeviceAllegroHandCANDef.h
 /home/margaretcoad/allegro_hand_linux_v4/grasp/rDeviceAllegroHandCANDef.h
 RockScissorsPaper.h
 /home/margaretcoad/allegro_hand_linux_v4/grasp/RockScissorsPaper.h
+Step.h
+/home/margaretcoad/allegro_hand_linux_v4/grasp/Step.h
 BHand/BHand.h
+-
+time.h
 -
 
 /home/margaretcoad/allegro_hand_linux_v4/grasp/rDeviceAllegroHandCANDef.h

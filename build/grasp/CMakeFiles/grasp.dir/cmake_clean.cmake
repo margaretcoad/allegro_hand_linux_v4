@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/grasp.dir/main.cpp.o"
   "CMakeFiles/grasp.dir/canAPI.cpp.o"
   "CMakeFiles/grasp.dir/RockScissorsPaper.cpp.o"
+  "CMakeFiles/grasp.dir/Step.cpp.o"
   "grasp.pdb"
   "grasp"
 )
