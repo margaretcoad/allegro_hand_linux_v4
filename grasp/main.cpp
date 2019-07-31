@@ -56,6 +56,10 @@ const double tau_cov_const_v4 = 1200.0; // 1200.0 for SAH040xxxxx
 FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// for PD controller
+double kp = 10;
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
 char Getch();
 void PrintInstruction();
@@ -355,11 +359,23 @@ void MainLoop()
 // Compute control torque for each joint using BHand library
 void ComputeTorque()
 {
-    if (!pBHand) return;
-    pBHand->SetJointPosition(q); // tell BHand library the current joint positions
-    pBHand->SetJointDesiredPosition(q_des);
-    pBHand->UpdateControl(0);
-    pBHand->GetJointTorque(tau_des);
+    // Designed PD controller
+    for (int i=0; i<MAX_DOF; i++) {
+        if (i == 3) {
+            tau_des[i] = kp*(q_des[i]-q[i]);
+        }
+        else {
+            tau_des[i] = 0;
+        }
+    }
+
+
+//    if (!pBHand) return;
+//    pBHand->SetJointPosition(q); // tell BHand library the current joint positions
+//    pBHand->SetJointDesiredPosition(q_des);
+//    pBHand->UpdateControl(0);
+//    pBHand->GetJointTorque(tau_des);
+
 
 //    static int j_active[] = {
 //        0, 0, 0, 0,
