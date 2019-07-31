@@ -57,7 +57,12 @@ FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for PD controller
-double kp = 10;
+double kp = 1;
+double kd = 0.05;
+double q_last[MAX_DOF];
+double q_des_last[MAX_DOF];
+double q_dot[MAX_DOF];
+double q_des_dot[MAX_DOF];
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
@@ -359,14 +364,27 @@ void MainLoop()
 // Compute control torque for each joint using BHand library
 void ComputeTorque()
 {
-    // Designed PD controller
+    // Calculate velocities for derivative gain
     for (int i=0; i<MAX_DOF; i++) {
-        if (i == 3) {
-            tau_des[i] = kp*(q_des[i]-q[i]);
-        }
-        else {
-            tau_des[i] = 0;
-        }
+        q_dot[i] = (q[i] - q_last[i])/delT;
+        q_des_dot[i] = (q_des[i] - q_des_last[i])/delT;
+    }
+
+    // Set torques based on PD controller
+    for (int i=0; i<MAX_DOF; i++) {
+//        if (i == 3) {
+//            tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
+//        }
+//        else {
+//            tau_des[i] = 0;
+//        }
+        tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
+    }
+
+    // Update positions for next time
+    for (int i=0; i<MAX_DOF; i++) {
+        q_des_last[i] = q_des[i];
+        q_last[i] = q[i];
     }
 
 
@@ -627,6 +645,12 @@ int main(int argc, TCHAR* argv[])
     memset(q_des, 0, sizeof(q_des));
     memset(tau_des, 0, sizeof(tau_des));
     memset(cur_des, 0, sizeof(cur_des));
+
+    memset(q_last, 0, sizeof(q_last));
+    memset(q_des_last, 0, sizeof(q_des_last));
+    memset(q_dot, 0, sizeof(q_dot));
+    memset(q_des_dot, 0, sizeof(q_des_dot));
+
     curTime = 0.0;
 
     if (CreateBHandAlgorithm() && OpenCAN())
