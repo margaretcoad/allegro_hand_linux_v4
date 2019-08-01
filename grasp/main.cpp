@@ -57,12 +57,15 @@ FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for PD controller
-double kp = 1;
-double kd = 0.05;
+double kp = 10;
+double kd = 0.2;
 double q_last[MAX_DOF];
 double q_des_last[MAX_DOF];
 double q_dot[MAX_DOF];
 double q_des_dot[MAX_DOF];
+double q_dot_filt[MAX_DOF];
+double q_dot_filt_last[MAX_DOF];
+double filt_param = 1; // 0.16; (1 is no filtering, 0 is max filtering)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
@@ -196,6 +199,19 @@ static void* ioThreadProc(void* inst)
                     {
                         fprintf(outFile,"%8.4f", q[i]);
                     }
+
+                    // print calculated velocity in radians/sec
+                    for (int i=0; i<16; i++)
+                    {
+                        fprintf(outFile,"%8.4f", q_dot[i]);
+                    }
+
+                    // print filtered velocity in radians/sec
+                    for (int i=0; i<16; i++)
+                    {
+                        fprintf(outFile,"%8.4f", q_dot_filt[i]);
+                    }
+
                     fprintf(outFile,"\n");
 
                     // compute joint torque
@@ -364,27 +380,30 @@ void MainLoop()
 // Compute control torque for each joint using BHand library
 void ComputeTorque()
 {
-    // Calculate velocities for derivative gain
+    // Calculate velocities and filtered velocities for derivative gain
     for (int i=0; i<MAX_DOF; i++) {
         q_dot[i] = (q[i] - q_last[i])/delT;
         q_des_dot[i] = (q_des[i] - q_des_last[i])/delT;
+        q_dot_filt[i] = (1-filt_param)*q_dot_filt_last[i] + filt_param*q_dot[i];
     }
 
     // Set torques based on PD controller
     for (int i=0; i<MAX_DOF; i++) {
-//        if (i == 3) {
+        if (i == 3) {
+            tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot_filt[i]);
 //            tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
-//        }
-//        else {
-//            tau_des[i] = 0;
-//        }
-        tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
+        }
+        else {
+            tau_des[i] = 0;
+        }
+//        tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
     }
 
-    // Update positions for next time
+    // Update positions and velocities for next time
     for (int i=0; i<MAX_DOF; i++) {
         q_des_last[i] = q_des[i];
         q_last[i] = q[i];
+        q_dot_filt_last[i] = q_dot_filt[i];
     }
 
 
@@ -637,7 +656,7 @@ int GetCANChannelIndex(const TCHAR* cname)
 // Program main
 int main(int argc, TCHAR* argv[])
 {
-    outFile = fopen("joint12radtest", "w");
+    outFile = fopen("alljointstest.txt", "w");
     PrintInstruction();
 
     memset(&vars, 0, sizeof(vars));
@@ -650,6 +669,8 @@ int main(int argc, TCHAR* argv[])
     memset(q_des_last, 0, sizeof(q_des_last));
     memset(q_dot, 0, sizeof(q_dot));
     memset(q_des_dot, 0, sizeof(q_des_dot));
+    memset(q_dot_filt, 0, sizeof(q_dot_filt));
+    memset(q_dot_filt_last, 0, sizeof(q_dot_filt_last));
 
     curTime = 0.0;
 
