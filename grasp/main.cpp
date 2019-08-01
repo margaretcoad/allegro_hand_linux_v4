@@ -15,6 +15,7 @@
 #include "Step.h"
 #include <BHand/BHand.h>
 #include <time.h>
+#include <cmath>
 
 #define PEAKCAN (1)
 
@@ -66,6 +67,13 @@ double q_des_dot[MAX_DOF];
 double q_dot_filt[MAX_DOF];
 double q_dot_filt_last[MAX_DOF];
 double filt_param = 1; // 0.16; (1 is no filtering, 0 is max filtering)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// for sine wave input
+bool sineInput = false;
+double sine_amp = 0.5;
+double sine_offset = 0.5;
+double sine_period = 5; // period in seconds
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
@@ -167,6 +175,14 @@ static void* ioThreadProc(void* inst)
 
                 if (data_return == (0x01 | 0x02 | 0x04 | 0x08))
                 {
+                    // calculate desired q for sine source
+                    if (sineInput) {
+                        for (i=0; i<MAX_DOF; i++)
+                        {
+                            q_des[i] = sine_amp*sin(2*M_PI*curTime / sine_period)+sine_offset;
+                        }
+                    }
+
                     // convert encoder count to joint angle
                     for (i=0; i<MAX_DOF; i++)
                     {
@@ -282,6 +298,7 @@ void MainLoop()
     while (bRun)
     {
         int c = Getch();
+        sineInput = false;
         switch (c)
         {
         case 'q':
@@ -371,6 +388,10 @@ void MainLoop()
 
         case '=':
             MotionStepUp12();
+            break;
+
+        case 's':
+            sineInput = true;
             break;
         }
     }
@@ -560,14 +581,14 @@ void PrintInstruction()
     printf("Toyota Research Institute is awesome!!!\n\n");
 
     printf("Keyboard Commands:\n");
-    printf("H: Home Position (PD control)\n");
-    printf("R: Ready Position (used before grasping)\n");
-    printf("G: Three-Finger Grasp\n");
-    printf("K: Four-Finger Grasp\n");
-    printf("P: Two-finger pinch (index-thumb)\n");
-    printf("M: Two-finger pinch (middle-thumb)\n");
-    printf("E: Envelop Grasp (all fingers)\n");
-    printf("A: Gravity Compensation\n");
+    printf("h: Home Position (PD control)\n");
+    printf("r: Ready Position (used before grasping)\n");
+    printf("g: Three-Finger Grasp\n");
+    printf("k: Four-Finger Grasp\n");
+    printf("p: Two-finger pinch (index-thumb)\n");
+    printf("m: Two-finger pinch (middle-thumb)\n");
+    printf("e: Envelop Grasp (all fingers)\n");
+    printf("a: Gravity Compensation\n");
     printf("1: Rock\n");
     printf("2: Scissors\n");
     printf("3: Paper\n");
@@ -580,8 +601,9 @@ void PrintInstruction()
     printf("0: Step Up Thumb Middle\n");
     printf("-: Step Up Thumb Rotate\n");
     printf("=: Step Up Thumb Grasp\n");
-    printf("F: Servos OFF (any grasp cmd turns them back on)\n");
-    printf("Q: Quit this program\n");
+    printf("s: Sine Wave Input\n");
+    printf("f: Servos OFF (any grasp cmd turns them back on)\n");
+    printf("q: Quit this program\n");
 
     printf("--------------------------------------------------\n\n");
 }
