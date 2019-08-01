@@ -58,15 +58,23 @@ FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for PD controller
-double kp = 10;
-double kd = 0.2;
+double kp[] = {
+        0, 0, 0, 10,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0};
+double kd[] = {
+        0, 0, 0, 0.2,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0};
 double q_last[MAX_DOF];
 double q_des_last[MAX_DOF];
 double q_dot[MAX_DOF];
 double q_des_dot[MAX_DOF];
 double q_dot_filt[MAX_DOF];
 double q_dot_filt_last[MAX_DOF];
-double filt_param = 1; // 0.16; (1 is no filtering, 0 is max filtering)
+double filt_param = 1; //(1 is no filtering, 0 is max filtering)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for sine wave input
@@ -410,14 +418,13 @@ void ComputeTorque()
 
     // Set torques based on PD controller
     for (int i=0; i<MAX_DOF; i++) {
-        if (i == 3) {
-            tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot_filt[i]);
-//            tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
-        }
-        else {
-            tau_des[i] = 0;
-        }
-//        tau_des[i] = kp*(q_des[i]-q[i]) + kd*(q_des_dot[i]-q_dot[i]);
+//        if (i == 3) {
+//            tau_des[i] = kp[i]*(q_des[i]-q[i]) + kd[i]*(q_des_dot[i]-q_dot_filt[i]);
+//        }
+//        else {
+//            tau_des[i] = 0;
+//        }
+        tau_des[i] = kp[i]*(q_des[i]-q[i]) + kd[i]*(q_des_dot[i]-q_dot[i]);
     }
 
     // Update positions and velocities for next time
