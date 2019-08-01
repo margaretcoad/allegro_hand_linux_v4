@@ -84,6 +84,10 @@ double sine_offset = 0.5;
 double sine_period = 5; // period in seconds
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// for parameter tuning
+int test_joint = 3;
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
 char Getch();
 void PrintInstruction();
@@ -187,7 +191,9 @@ static void* ioThreadProc(void* inst)
                     if (sineInput) {
                         for (i=0; i<MAX_DOF; i++)
                         {
-                            q_des[i] = sine_amp*sin(2*M_PI*curTime / sine_period)+sine_offset;
+                            if (i == test_joint) {
+                                q_des[i] = sine_amp*sin(2*M_PI*curTime / sine_period)+sine_offset;
+                            }
                         }
                     }
 
@@ -418,13 +424,13 @@ void ComputeTorque()
 
     // Set torques based on PD controller
     for (int i=0; i<MAX_DOF; i++) {
-//        if (i == 3) {
+//        if (i == test_joint) {
 //            tau_des[i] = kp[i]*(q_des[i]-q[i]) + kd[i]*(q_des_dot[i]-q_dot_filt[i]);
 //        }
 //        else {
 //            tau_des[i] = 0;
 //        }
-        tau_des[i] = kp[i]*(q_des[i]-q[i]) + kd[i]*(q_des_dot[i]-q_dot[i]);
+        tau_des[i] = kp[i]*(q_des[i]-q[i]) + kd[i]*(q_des_dot[i]-q_dot_filt[i]);
     }
 
     // Update positions and velocities for next time
