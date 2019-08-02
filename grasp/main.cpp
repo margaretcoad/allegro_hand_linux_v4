@@ -58,16 +58,24 @@ FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for PD controller
-double kp[] = {
-        0, 0, 0, 10,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0};
-double kd[] = {
-        0, 0, 0, 0.2,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0};
+double kp[] = {1, 1, 1, 1,
+               1, 1, 1, 1,
+               1, 1, 1, 1,
+               1, 1, 1, 1};
+double kd[] = {0.05, 0.05, 0.05, 0.05,
+               0.05, 0.05, 0.05, 0.05,
+               0.05, 0.05, 0.05, 0.05,
+               0.05, 0.05, 0.05, 0.05};
+//double kp[] = {
+//        10, 6, 8, 10,
+//        10, 6, 8, 10,
+//        10, 6, 8, 10,
+//        6, 6, 6, 6};
+//double kd[] = {
+//        0.16, 0.12, 0.14, 0.2,
+//        0.16, 0.12, 0.14, 0.2,
+//        0.16, 0.12, 0.14, 0.2,
+//        0.12, 0.12, 0.12, 0.12};
 double q_last[MAX_DOF];
 double q_des_last[MAX_DOF];
 double q_dot[MAX_DOF];
@@ -79,13 +87,21 @@ double filt_param = 1; //(1 is no filtering, 0 is max filtering)
 /////////////////////////////////////////////////////////////////////////////////////////
 // for sine wave input
 bool sineInput = false;
-double sine_amp = 0.5;
-double sine_offset = 0.5;
-double sine_period = 5; // period in seconds
+double sine_amp[] = {
+        0.5, 0.5, 0.5, 0.5,
+        0.5, 0.5, 0.5, 0.5,
+        0.5, 0.5, 0.5, 0.5,
+        0.5, 0.5, 0.5, 0.5};
+double sine_offset[] = {
+        0, 0.5, 0.5, 0.5,
+        0, 0.5, 0.5, 0.5,
+        0, 0.5, 0.5, 0.5,
+        1, 0.5, 0.5, 0.5};
+double sine_period = 2; // period in seconds
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for parameter tuning
-int test_joint = 3;
+int test_joint = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
@@ -191,9 +207,10 @@ static void* ioThreadProc(void* inst)
                     if (sineInput) {
                         for (i=0; i<MAX_DOF; i++)
                         {
-                            if (i == test_joint) {
-                                q_des[i] = sine_amp*sin(2*M_PI*curTime / sine_period)+sine_offset;
-                            }
+//                            if (i == test_joint) {
+//                                q_des[i] = sine_amp[i]*sin(2*M_PI*curTime / sine_period)+sine_offset[i];
+//                            }
+                            q_des[i] = sine_amp[i]*sin(2*M_PI*curTime / sine_period)+sine_offset[i];
                         }
                     }
 
