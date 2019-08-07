@@ -58,24 +58,16 @@ FILE *outFile;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for PD controller
-//double kp[] = {1, 1, 1, 1,
-//               1, 1, 1, 1,
-//               1, 1, 1, 1,
-//               1, 1, 1, 1};
-//double kd[] = {0.05, 0.05, 0.05, 0.05,
-//               0.05, 0.05, 0.05, 0.05,
-//               0.05, 0.05, 0.05, 0.05,
-//               0.05, 0.05, 0.05, 0.05};
 double kp[] = {
         10, 6, 8, 10,
         10, 6, 8, 10,
         10, 6, 8, 10,
-        6, 6, 6, 6};
+        10, 10, 10, 10};
 double kd[] = {
         0.16, 0.12, 0.14, 0.2,
         0.16, 0.12, 0.14, 0.2,
         0.16, 0.12, 0.14, 0.2,
-        0.12, 0.12, 0.12, 0.12};
+        0.18, 0.16, 0.16, 0.16};
 double q_last[MAX_DOF];
 double q_des_last[MAX_DOF];
 double q_dot[MAX_DOF];
@@ -97,12 +89,15 @@ double sine_offset[] = {
         0, 0.5, 0.5, 0.5,
         0, 0.5, 0.5, 0.5,
         1, 0.5, 0.5, 0.5};
-double sine_period = 2; // period in seconds
+double sine_period = 10; // period in seconds
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // for parameter tuning
 int test_joint = 0;
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// for current limiting
+double currentLimit = 0.9;
 /////////////////////////////////////////////////////////////////////////////////////////
 // functions declarations
 char Getch();
@@ -268,8 +263,8 @@ static void* ioThreadProc(void* inst)
                     for (int i=0; i<MAX_DOF; i++)
                     {
                         cur_des[i] = tau_des[i];
-                        if (cur_des[i] > 0.96) cur_des[i] = 0.96; // used to be 1.0
-                        else if (cur_des[i] < -0.96) cur_des[i] = -0.96;
+                        if (cur_des[i] > currentLimit) cur_des[i] = currentLimit; // used to be 1.0
+                        else if (cur_des[i] < -currentLimit) cur_des[i] = -currentLimit;
                     }
 
                     // send torques
@@ -560,7 +555,7 @@ void CloseCAN()
 
     if (ioThreadRun)
     {
-        printf(">CAN: stoped listening CAN frames\n");
+        printf(">CAN: stopped listening CAN frames\n");
         ioThreadRun = false;
         int status;
         pthread_join(hThread, (void **)&status);
