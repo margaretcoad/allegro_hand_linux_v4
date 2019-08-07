@@ -26,7 +26,7 @@ typedef char    TCHAR;
 using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// for CAN communication12
+// for CAN communication
 const double delT = 0.003;
 int CAN_Ch = 0;
 bool ioThreadRun = false;
@@ -268,8 +268,8 @@ static void* ioThreadProc(void* inst)
                     for (int i=0; i<MAX_DOF; i++)
                     {
                         cur_des[i] = tau_des[i];
-                        if (cur_des[i] > 1.0) cur_des[i] = 1.0;
-                        else if (cur_des[i] < -1.0) cur_des[i] = -1.0;
+                        if (cur_des[i] > 0.96) cur_des[i] = 0.96; // used to be 1.0
+                        else if (cur_des[i] < -0.96) cur_des[i] = -0.96;
                     }
 
                     // send torques
