@@ -26,7 +26,7 @@ typedef char    TCHAR;
 using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// for CAN communication
+// for CAN communication12
 const double delT = 0.003;
 int CAN_Ch = 0;
 bool ioThreadRun = false;
