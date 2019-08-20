@@ -281,13 +281,18 @@ static void* ioThreadProc(void* inst)
                     for (int i=0; i<4;i++)
                     {
                         vars.pwm_demand[i*4+0] = (short)(cur_des[i*4+0]*tau_cov_const_v4);
+                        printf("%d ", vars.pwm_demand[i*4+0]);
                         vars.pwm_demand[i*4+1] = (short)(cur_des[i*4+1]*tau_cov_const_v4);
+                        printf("%d ", vars.pwm_demand[i*4+1]);
                         vars.pwm_demand[i*4+2] = (short)(cur_des[i*4+2]*tau_cov_const_v4);
+                        printf("%d ", vars.pwm_demand[i*4+2]);
                         vars.pwm_demand[i*4+3] = (short)(cur_des[i*4+3]*tau_cov_const_v4);
+                        printf("%d ", vars.pwm_demand[i*4+3]);
 
                         command_set_torque(CAN_Ch, i, &vars.pwm_demand[4*i]);
                         //usleep(5);
                     }
+                    printf("\n");
                     sendNum++;
                     curTime += delT;
                     data_return = 0;
