@@ -16,6 +16,8 @@
 #include <BHand/BHand.h>
 #include <time.h>
 #include <cmath>
+#include <lcm/lcm-cpp.hpp>
+#include "exlcm/lcmt_allegro_command.hpp"
 
 #define PEAKCAN (1)
 
@@ -119,7 +121,36 @@ int GetCANChannelIndex(const TCHAR* cname);
 bool CreateBHandAlgorithm();
 void DestroyBHandAlgorithm();
 void ComputeTorque();
+/////////////////////////////////////////////////////////////////////////////////////////
+// for lcm
+bool lcmListen = false;
+/////////////////////////////////////////////////////////////////////////////////////////
+// LCM Message Handler
+class Handler {
+public:
+    ~Handler() {}
+    void handleMessage(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                       const exlcm::lcmt_allegro_command *msg)
+    {
+        int i;
+//    printf("Received message on channel \"%s\":\n", chan.c_str());
+//    printf("  timestamp   = %lld\n", (long long) msg->utime);
+//    printf("  position    = (%f, %f, %f, %f)\n",
+//           msg->joint_position[0],
+//           msg->joint_position[1],
+//           msg->joint_position[2],
+//           msg->joint_position[3]);
 
+        for (i = 0; i < MAX_DOF; i++) {
+            q_des[i] = msg->joint_position[i];
+        }
+
+    }
+};
+/////////////////////////////////////////////////////////////////////////////////////////
+// lcm variables
+lcm::LCM my_lcm;
+Handler handlerObject;
 /////////////////////////////////////////////////////////////////////////////////////////
 // Read keyboard input (one char) from stdin
 char Getch()
@@ -219,6 +250,11 @@ static void* ioThreadProc(void* inst)
                         }
                     }
 
+                    // read desired q for lcm source
+                    if (lcmListen) {
+                        my_lcm.handleTimeout(1);
+                    }
+
                     // convert encoder count to joint angle
                     for (i=0; i<MAX_DOF; i++)
                     {
@@ -281,18 +317,18 @@ static void* ioThreadProc(void* inst)
                     for (int i=0; i<4;i++)
                     {
                         vars.pwm_demand[i*4+0] = (short)(cur_des[i*4+0]*tau_cov_const_v4);
-                        printf("%d ", vars.pwm_demand[i*4+0]);
+//                        printf("%d ", vars.pwm_demand[i*4+0]);
                         vars.pwm_demand[i*4+1] = (short)(cur_des[i*4+1]*tau_cov_const_v4);
-                        printf("%d ", vars.pwm_demand[i*4+1]);
+//                        printf("%d ", vars.pwm_demand[i*4+1]);
                         vars.pwm_demand[i*4+2] = (short)(cur_des[i*4+2]*tau_cov_const_v4);
-                        printf("%d ", vars.pwm_demand[i*4+2]);
+//                        printf("%d ", vars.pwm_demand[i*4+2]);
                         vars.pwm_demand[i*4+3] = (short)(cur_des[i*4+3]*tau_cov_const_v4);
-                        printf("%d ", vars.pwm_demand[i*4+3]);
+//                        printf("%d ", vars.pwm_demand[i*4+3]);
 
                         command_set_torque(CAN_Ch, i, &vars.pwm_demand[4*i]);
                         //usleep(5);
                     }
-                    printf("\n");
+//                    printf("\n");
                     sendNum++;
                     curTime += delT;
                     data_return = 0;
@@ -340,6 +376,7 @@ void MainLoop()
     {
         int c = Getch();
         sineInput = false;
+        lcmListen = false;
         switch (c)
         {
         case 'q':
@@ -433,6 +470,10 @@ void MainLoop()
 
         case 's':
             sineInput = true;
+            break;
+
+        case 'l':
+            lcmListen = true;
             break;
         }
     }
@@ -642,6 +683,7 @@ void PrintInstruction()
     printf("-: Step Up Thumb Rotate\n");
     printf("=: Step Up Thumb Grasp\n");
     printf("s: Sine Wave Input\n");
+    printf("l: Listen to Allegro commands transmitted over LCM\n");
     printf("f: Servos OFF (any grasp cmd turns them back on)\n");
     printf("q: Quit this program\n");
 
@@ -735,6 +777,11 @@ int main(int argc, TCHAR* argv[])
     memset(q_dot_filt_last, 0, sizeof(q_dot_filt_last));
 
     curTime = 0.0;
+
+    // set up LCM
+    if(!my_lcm.good())
+        return 1;
+    my_lcm.subscribe("ALLEGRO_COMMAND", &Handler::handleMessage, &handlerObject);
 
     if (CreateBHandAlgorithm() && OpenCAN())
         MainLoop();
